@@ -61,17 +61,19 @@ for i in range(epoch):
     
     for j, m in data.train_loader:
         if j.size(1)==1:
-            j = torch.stack([j,j,j]).squeeze(2).permute(1,0,2,3)
+            j = torch.stack([j,j,j]).squeeze(2).permute(1,0,2,3) # [b,1,w,h] -> [b,3,w,h]
         model.zero_grad()
         
         # vector,pi, mu, sigma, reconstructions = model(j.cuda())
+        print('j.size() = {}, m.size() = {}'.format(j.size(), m.size()))
         vector, reconstructions = model(j.cuda())
+        print('vector.size() = {}, reconstructions.size() = {}'.format(vector.size(), reconstructions.size()))
         pi, mu, sigma = G_estimate(vector)
         
         #Loss calculations
-        loss1 = F.mse_loss(reconstructions,j.cuda(), reduction='mean') #Rec Loss
+        loss1 = F.mse_loss(reconstructions, j.cuda(), reduction='mean') #Rec Loss
         loss2 = -ssim_loss(j.cuda(), reconstructions) #SSIM loss for structural similarity
-        loss3 = mdn1.mdn_loss_function(vector,mu,sigma,pi) #MDN loss for gaussian approximation
+        loss3 = mdn1.mdn_loss_function(vector, mu, sigma, pi) #MDN loss for gaussian approximation
         
         print(f' loss3  : {loss3.item()}')
         loss = 5*loss1 + 0.5*loss2 + loss3       #Total loss

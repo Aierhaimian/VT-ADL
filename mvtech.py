@@ -70,7 +70,7 @@ def read_files(root,d, product, data_motive = 'train', use_good = True, normal =
                     return im_pt #tr_img_pth, images
                     
 def load_images(path, image_name):
-    return imread(os.path.join(path,image_name))
+    return imread(os.path.join(path,image_name)) # read RGB image
 
     
 def Test_anom_data(root, product= 'bottle', use_good = False):
@@ -191,11 +191,11 @@ class Mvtec:
                 transforms.ToTensor(),
     #            transforms.Normalize((0.1307,), (0.3081,)),
             ])
-            train_normal_image = torch.stack([T(load_images(j,i)) for j in train_path_images.keys() for i in train_path_images[j]])
+            train_normal_image = torch.stack([T(load_images(j,i)) for j in train_path_images.keys() for i in train_path_images[j]]) # [n,c,w,h]
             test_anom_image = torch.stack([T(load_images(j,i)) for j in test_anom_path_images.keys() for i in test_anom_path_images[j]])
             test_normal_image = torch.stack([T(load_images(j,i)) for j in test_norm_path_images.keys() for i in test_norm_path_images[j]])
             
-            train_normal_mask = torch.zeros(train_normal_image.size(0), 1,train_normal_image.size(2), train_normal_image.size(3)  )
+            train_normal_mask = torch.zeros(train_normal_image.size(0), 1,train_normal_image.size(2), train_normal_image.size(3)  ) # [n,1,w,h]
             test_normal_mask = torch.zeros(test_normal_image.size(0), 1,test_normal_image.size(2), test_normal_image.size(3)  )
             test_anom_mask = torch.stack([Process_mask(T(load_images(j,i))) for j in test_anom_mask_path_images.keys() for i in test_anom_mask_path_images[j]])
             
@@ -217,7 +217,7 @@ class Mvtec:
             val_set = [*val_norm, *val_anom]
             print(f' --Total Image in {self.product} Validation loader: {len(val_set)}--')
             ####  Final Data Loader ####
-            self.train_loader  = torch.utils.data.DataLoader(train_normal, batch_size=batch_size, shuffle=True)            
+            self.train_loader  = torch.utils.data.DataLoader(train_normal, batch_size=batch_size, shuffle=True) # ([b,c,w,h], [b,1,w,h])            
             self.test_anom_loader = torch.utils.data.DataLoader(test_anom, batch_size = batch_size, shuffle=False)
             self.test_norm_loader = torch.utils.data.DataLoader(test_normal, batch_size=batch_size, shuffle=False)
             self.validation_loader = torch.utils.data.DataLoader(val_set, batch_size=batch_size, shuffle=False)
